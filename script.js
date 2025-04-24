@@ -5,6 +5,7 @@
 
     - Player Factory + 2 Instances
         - variable: name, score
+        - methods: makeMove
 
     - Gameflow controller
 */
@@ -26,6 +27,10 @@ function createGameBoard(){
     }
 
     const makeMove = (row, col, string)=>{
+        if (grid[row][col] !== '.'){
+            console.log("cell already occupied!")
+            return
+        } 
         grid[row][col] = string
     }
 
@@ -38,9 +43,7 @@ function createGameBoard(){
     const isGameOver = ()=>{
         console.log("checking if game is over....")
 
-        for(const row of grid){
-            console.log(row.join(''))
-        }
+
 
         // check three rows
         for(let x in grid){
@@ -89,6 +92,7 @@ function createGameBoard(){
             return true
         }
 
+        console.log("Nope, not over yet!")
         return false
     }
     
@@ -107,11 +111,10 @@ function createGame(){
 
     const gameBoard = createGameBoard()
     
-        
     gameBoard.viewGrid()
     let move = 'O'
 
-    while (!gameBoard.isGameOver()){
+    while (true){
         console.log("===========================")
         
         coordinates = prompt("Coordinates: ")
@@ -120,8 +123,17 @@ function createGame(){
         [row,col] = coordinates.split(" ")
         row = Number(row)-1
         col = Number(col)-1
+        console.log(row, col)
+
+        if (row<0 || row>2  || col<0 || col>2){
+            console.log("Please use ranges 1-3 for rows and cols")
+            continue
+
+        }
 
         gameBoard.makeMove(row, col, move)
+
+        if (gameBoard.isGameOver()) break
         if (move === 'O'){
             move = 'X'
         } else {
@@ -131,7 +143,29 @@ function createGame(){
 
     }
 
-    console.log("Game Over!", move, "loses!")
+    console.log("Game Over!", move, "wins!")
+
+    let char = prompt("wanna play more? (y/n)")
+    if (char === 'y'){
+        createGame()
+    } else{
+        return
+    }
+
+}
+
+function createPlayer(name, string, gameBoard){
+    let score = 0;
+
+    function makeMove(row, col){
+        gameBoard.makeMove(row, col, string)
+    }
+
+    return {
+        name, 
+        score,
+        makeMove
+    }
 
 }
 
