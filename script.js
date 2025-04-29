@@ -20,7 +20,7 @@ function createGameBoard(){
 
     const resetGrid = ()=>{
         for (const row in grid){
-            for(const col in grid[i]){
+            for(const col in grid[row]){
                 grid[row][col] = '.';
             }
         }
@@ -110,77 +110,148 @@ function createGameBoard(){
 (function createGame(){
 
     const gameBoard = createGameBoard();
-    
-    gameBoard.viewGrid();
-    let move = 'O';
-    let count = 0;
 
-    while (true){
-        console.log("===========================");
-        
-        coordinates = prompt("Coordinates: ");
-        let row;
-        let col;
-        [row,col] = coordinates.split(" ")
-        row = Number(row)-1
-        col = Number(col)-1
-        console.log(row, col)
-
-        if (row<0 || row>2  || col<0 || col>2){
-            alert("Please use ranges 1-3 for rows and cols")
-            continue
-
-        }
-
-        gameBoard.makeMove(row, col, move);
-        count++;
-
-        if (gameBoard.isGameOver()) {
-            gameBoard.viewGrid();
-
-            console.log(`Game Over! ${move} wins!`);
-            alert(`Game Over! ${move} wins!`)
-            // global.alert("GAME OVER")
-            
-            break
-        
-        } else if(count===9){
-            gameBoard.viewGrid();
-            console.log("It's a tie!");
-            alert("It's a tie!");
-            break;
-
-        }
-        
-        // for (let row in grid){
-        //     for (let col in grid){
-                
-        //     }
-        // }
-        if (move === 'O'){
-            move = 'X'
-        } else {
-            move = 'O';
-        }
+    const singleGameLogic = (playerOne, playerTwo)=>{
+        let currPlayer = playerOne;
         gameBoard.viewGrid();
+        let count = 0;
+    
+        while (true){
+            console.log("===========================");
+            
+            coordinates = prompt("Coordinates: ");
+            let row;
+            let col;
+            [row,col] = coordinates.split(" ");
+            row = Number(row)-1;
+            col = Number(col)-1;
+            console.log(row, col);
+    
+            if (row<0 || row>2  || col<0 || col>2){
+                alert("Please use ranges 1-3 for rows and cols");
+                continue;
+    
+            }
 
+            console.log(playerOne)
+    
+            currPlayer.makeMove(row, col);
+            count++;
+            gameBoard.viewGrid();
+    
+            if (gameBoard.isGameOver()) {
+    
+                console.log(`Game Over! ${currPlayer.getName()} wins!`);
+                alert(`Game Over! ${currPlayer.getName()} wins!`)
+
+                // winner: O, loser: X. loser goes
+                let loser;
+
+                if (currPlayer === playerTwo){
+                    loser = playerOne;
+                } else if (currPlayer === playerOne){
+                    loser = playerTwo;
+                }
+
+                // global.alert("GAME OVER")
+                
+                return [currPlayer, loser];
+            
+            } else if(count===9){
+                console.log("It's a tie!");
+                alert("It's a tie!");
+                
+                return 0;
+    
+            }
+
+            if (currPlayer === playerOne){
+                currPlayer = playerTwo;
+            } else if (currPlayer === playerTwo){
+                currPlayer = playerOne;
+            }
+        }
     }
 
-
-    (function promptUserAfterGame(){
-        let char = prompt(`Wanna play more? (y/n)`);
-        if (char.toLowerCase() === 'y'){
-            createGame();
-        } else if (char.toLowerCase() === 'n'){
-            return;
-        } else{
-            alert("Invalid key. Please input y/n");
-            promptUserAfterGame();
+    function createPlayer(name, string, gameBoard){
+        let score = 0;
+    
+        function makeMove(row, col){
+            gameBoard.makeMove(row, col, string)
         }
+    
+        function setString(move){
+            string = move;
+        }
+        function getName(){
+            return name;
+        }
+        function getScore(){
+            return score
+        }
+        function addScore(){
+            score += 1;
+        }
+    
+        return {
+            getName, 
+            getScore,
+            makeMove,
+            setString,
+            addScore
+        }
+    }
+    
+    const playerOneName = prompt("PLAYER 1 - name please?");
+    const playerTwoName = prompt("PLAYER 2 - name please?");
+    
+    playerOne = createPlayer(playerOneName, 'X', gameBoard);
+    playerTwo = createPlayer(playerTwoName, 'O', gameBoard);
+
+    let currPlayerOne = {...playerOne};
+    let currPlayerTwo = {...playerTwo};
+
+
+    (function wholeGame(){
+
+        while(true){
+            let result = singleGameLogic(currPlayerOne, currPlayerTwo);
+            if (result === 0){
+
+            } else{
+                let winner;
+                let loser;
+                [winner, loser] = result;
+                winner.addScore()
+
+                currPlayerTwo = {...winner};
+                currPlayerOne = {...loser};
+
+                currPlayerOne.setString('X');
+                currPlayerTwo.setString('O');
+            }            
+            // playerOne vs playerTwo, NOT loser vs winner
+            console.log(playerOne.getName(), playerOne.getScore(), '-', playerTwo.getScore(), playerTwo.getName())        
+        
+
+
+            while(true){
+                let char = prompt(`Wanna play more? (y/n)`);
+                if (char.toLowerCase() === 'y'){
+                    gameBoard.resetGrid();
+                    break;
+                } else if (char.toLowerCase() === 'n'){
+                    return;
+                } else{
+                    alert("Invalid key. Please input y/n");
+                }
+            }
+
+        }
+
+
+
     })()
-
-
-
 })()
 
 // create first player - name, score, string
@@ -192,23 +263,10 @@ function createGameBoard(){
 
 // for each move, console.log(<FIRST_PLAYER> <FIRST_PLAYER.score> - <SECOND_PLAYER.score> <SECOND_PLAYER)
 // If a player won:
-    // announce winner after end and the score so far
+//     announce winner after end and the score so far
 // Else:
-    // announce the tie and the score so far
-function createPlayer(name, string, gameBoard){
-    let score = 0;
+//     announce the tie and the score so far
 
-    function makeMove(row, col){
-        gameBoard.makeMove(row, col, string)
-    }
-
-    return {
-        name, 
-        score,
-        makeMove
-    }
-
-}
 
 // createGame()
 
