@@ -202,39 +202,37 @@ function createGameBoard(){
         }
     }
     
+
     const playerOneName = prompt("PLAYER 1 - name please?");
     const playerTwoName = prompt("PLAYER 2 - name please?");
     
     playerOne = createPlayer(playerOneName, 'X', gameBoard);
     playerTwo = createPlayer(playerTwoName, 'O', gameBoard);
 
-    let currPlayerOne = {...playerOne};
-    let currPlayerTwo = {...playerTwo};
+    if (playerOne === undefined || playerTwo === undefined){
+        // return;
+    }
+
+    // let currPlayerOne = {...playerOne};
+    // let currPlayerTwo = {...playerTwo};
 
 
     (function wholeGame(){
+        
 
         while(true){
-            let result = singleGameLogic(currPlayerOne, currPlayerTwo);
+            let result = singleGameLogic(playerOne, playerTwo);
             if (result === 0){
 
             } else{
                 let winner;
                 let loser;
                 [winner, loser] = result;
-                winner.addScore()
-
-                currPlayerTwo = {...winner};
-                currPlayerOne = {...loser};
-
-                currPlayerOne.setString('X');
-                currPlayerTwo.setString('O');
+                winner.addScore();
             }            
-            // playerOne vs playerTwo, NOT loser vs winner
-            console.log(playerOne.getName(), playerOne.getScore(), '-', playerTwo.getScore(), playerTwo.getName())        
+            
+            console.log(`${playerOne.getName()} ${playerOne.getScore()} - ${playerTwo.getScore()} ${playerTwo.getName()}`)        
         
-
-
             while(true){
                 let char = prompt(`Wanna play more? (y/n)`);
                 if (char.toLowerCase() === 'y'){
@@ -248,9 +246,6 @@ function createGameBoard(){
             }
 
         }
-
-
-
     })()
 })()
 
