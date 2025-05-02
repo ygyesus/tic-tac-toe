@@ -36,8 +36,12 @@ h1{
     font-size: 30px;
 }
 
-button:hover{
-    background: rgb(0 0 0 / 20%)
+
+
+.container button:focus, .container button:hover{
+    border: 6px solid black;
+    color: lightblue;
+
 }
 
 .neutral, .display-status{

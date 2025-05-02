@@ -44,6 +44,7 @@ function createGameBoard(){
 
     const isGameOver = ()=>{
         console.log("checking if game is over....");
+        viewGrid();
 
 
 
@@ -94,7 +95,7 @@ function createGameBoard(){
             return true;
         }
 
-        console.log("Nope, not over yet!")
+        // console.log("Nope, not over yet!")
         return false;
     }
 
@@ -152,7 +153,7 @@ function createGame(gameBoard, playerOneName, playerTwoName){
             return outcome;
         }
         switchTurn();
-        gameBoard.viewGrid();
+        // gameBoard.viewGrid();
         return outcome;
         
     };
@@ -288,9 +289,20 @@ function ScreenController(){
     const formButton = form.querySelector("button");
     const playerOneName = form.querySelector(".player-one").value;
     const playerTwoName = form.querySelector(".player-two").value;
-    formButton.addEventListener("click", ()=>{
-        console.log("HOOORAY");
+
+    const newGameButton = document.querySelector(".new-game");
+    newGameButton.addEventListener("click", ()=>{
+        let screen = ScreenController();
+        screen.updateScreen();
+        const playerOneInput = document.querySelector("input");
+        playerOneInput.focus();
     });
+
+    const submitButton = document.querySelector(".submit");
+    submitButton.addEventListener("click", ()=>{
+        let screen = ScreenController();
+        screen.updateScreen();
+    })
     const game = createGame(gameBoard, playerOneName, playerTwoName);
     const activePlayer = game.getActivePlayer();
 
@@ -299,6 +311,81 @@ function ScreenController(){
     displayStatus.classList.add("neutral");
     displayStatus.textContent = "";
 
+    const pressKeyDown = (event, row, col)=>{
+        const key = event.target.key;
+        if (event.code === "ArrowDown"){
+            const focusedCell = document.activeElement;
+            if (row === 2){
+                return;
+            }
+            let nextRow = Number(row)+1;
+            
+            // console.log(nextRow);
+            // col = String(col);
+            const buttons = document.querySelectorAll('[data-col]');
+            for (const button of buttons){
+                if (button.dataset.row === String(nextRow) && button.dataset.col === String(col)){
+                    button.focus();
+                    return;
+                }
+            }
+            return;
+        }
+
+        if(event.code === "ArrowUp"){
+            if (row===0){
+                return;
+            }
+
+            let nextRow = Number(row)-1;
+            const buttons = document.querySelectorAll('[data-col]');
+            for (const button of buttons){
+                if (button.dataset.row === String(nextRow) && button.dataset.col === String(col)){
+                    button.focus();
+                    return;
+                }
+            }
+            return;
+        }
+
+        if (event.code === "ArrowLeft"){
+            if (col===0){
+                return;
+            }
+
+            let nextCol = Number(col)-1;
+            const buttons = document.querySelectorAll('[data-col]');
+
+            for (const button of buttons){
+                if (button.dataset.row === String(row) && button.dataset.col === String(nextCol)){
+                    button.focus();
+                    return;
+                }
+            }
+            return;
+        }
+
+        if (event.code === "ArrowRight"){
+            if (col===2){
+                return;
+            }
+
+            let nextCol = Number(col)+1;
+            const buttons = document.querySelectorAll('[data-col]');
+
+            for (const button of buttons){
+                if (button.dataset.row === String(row) && button.dataset.col === String(nextCol)){
+                    button.focus();
+                    return;
+                }
+            }
+            return;
+        }
+        // const nextButton = document.querySelector('[data-row=`${nextRow}`][data-col="2"]');
+        // nextButton.focus();
+    };
+
+    
     
     
 
@@ -315,6 +402,12 @@ function ScreenController(){
                 const button = document.createElement("button");
                 // button.textContent = grid[row][col];
                 container.appendChild(button);
+                button.dataset.row = String(row);
+                button.dataset.col = String(col);
+                // console.log(button.dataset.row);
+                button.addEventListener("keydown", (event)=>{
+                    pressKeyDown(event, row, col);
+                });
                 button.addEventListener("click", (event)=>{
                     if (!canClick){
                         return;
@@ -328,7 +421,7 @@ function ScreenController(){
                     if(string === "X"){
                         button.style.backgroundColor = "red";
                     } else if (string === "O"){
-                        button.style.backgroundColor = "yellow";
+                        button.style.backgroundColor = "goldenrod";
                     }
 
                     if (outcome !== "keep going"){
@@ -345,10 +438,9 @@ function ScreenController(){
             }
 
         }
-        console.log("GRID:");
-        console.log(gameBoard.getGrid());
     
     }
+    updateScreen();
 
 
     return {
@@ -358,19 +450,7 @@ function ScreenController(){
 
 let screen = ScreenController();
 
-screen.updateScreen();
-const newGameButton = document.querySelector(".new-game");
-newGameButton.addEventListener("click", ()=>{
-    let screen = ScreenController();
-    screen.updateScreen();
-    const playerOneInput = document.querySelector("input");
-    playerOneInput.focus();
-});
 
-const submitButton = document.querySelector(".submit");
-submitButton.addEventListener("click", ()=>{
-    let screen = ScreenController();
-    screen.updateScreen();
-})
+
 
 
