@@ -114,11 +114,14 @@ function createGameBoard(){
 
 
 
-function createGame(gameBoard){
+function createGame(gameBoard, playerOneName, playerTwoName){
+    playerOneName = playerOneName === ""
+        ? 'X' : playerOneName;
     
-
-    let playerOne = createPlayer("Arthur", "X", gameBoard);
-    let playerTwo = createPlayer("Bob", "O", gameBoard);
+    playerTwoName = playerTwoName === ""
+        ? 'O': playerTwoName;
+    let playerOne = createPlayer(playerOneName, "X", gameBoard);
+    let playerTwo = createPlayer(playerTwoName, "O", gameBoard);
 
     const players = [
         playerOne,
@@ -156,7 +159,11 @@ function createGame(gameBoard){
     const judgeOutcome = ()=>{
         if (gameBoard.isGameOver()) {
             // switchTurn();
-            const announcement = `Game Over! ${getActivePlayer().getName()} wins!`
+
+            const winner = getActivePlayer().getName();
+            switchTurn();
+            const loozer = getActivePlayer().getName();
+            const announcement = `Game Over! ${winner} wins! ${loozer} loses!`;
         
             // console.log(announcement);
             // alert(`Game Over! ${getActivePlayer().getName()} wins!`);
@@ -276,14 +283,17 @@ function createPlayer(name, string, gameBoard){
 function ScreenController(){
     const container = document.querySelector(".container");
     const gameBoard = createGameBoard();
-    const game = createGame(gameBoard);
-    const activePlayer = game.getActivePlayer();
     const displayStatus = document.querySelector(".display");
     const form = document.querySelector("form");
     const formButton = form.querySelector("button");
+    const playerOneName = form.querySelector(".player-one").value;
+    const playerTwoName = form.querySelector(".player-two").value;
     formButton.addEventListener("click", ()=>{
         console.log("HOOORAY");
     });
+    const game = createGame(gameBoard, playerOneName, playerTwoName);
+    const activePlayer = game.getActivePlayer();
+
     console.log(displayStatus)
     displayStatus.classList.remove("display-status");
     displayStatus.classList.add("neutral");
@@ -353,5 +363,14 @@ const newGameButton = document.querySelector(".new-game");
 newGameButton.addEventListener("click", ()=>{
     let screen = ScreenController();
     screen.updateScreen();
+    const playerOneInput = document.querySelector("input");
+    playerOneInput.focus();
+});
+
+const submitButton = document.querySelector(".submit");
+submitButton.addEventListener("click", ()=>{
+    let screen = ScreenController();
+    screen.updateScreen();
 })
+
 
