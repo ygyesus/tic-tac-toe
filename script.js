@@ -29,15 +29,17 @@ function createGameBoard(){
     const makeMove = (row, col, string)=>{
         if (grid[row][col] !== '.'){
             alert("cell already occupied!");
-            return;
+            return false;
         } 
         grid[row][col] = string;
+        return string;
     }
 
     const viewGrid = ()=>{
         for (const row of grid){
             console.log(row);
         }
+        console.log(" ");
     }
 
     const isGameOver = ()=>{
@@ -78,10 +80,10 @@ function createGameBoard(){
 
         // check NW => SE diagonal
         if (grid[0][0] === 'O' && grid[1][1] === 'O' && grid[2][2] === 'O'){
-            return true
+            return true;
         }
         if (grid[0][0] === 'X' && grid[1][1] === 'X' && grid[2][2] === 'X'){
-            return true
+            return true;
         }
         
         // check SW => NE diagonal
@@ -93,162 +95,165 @@ function createGameBoard(){
         }
 
         console.log("Nope, not over yet!")
-        return false
+        return false;
     }
+
+    const getGrid = ()=>grid;
     
 
     return {
         resetGrid, 
         makeMove, 
         viewGrid, 
-        isGameOver
+        isGameOver,
+        getGrid
     };
 
 }
 
 
-(function createGame(){
 
-    const gameBoard = createGameBoard();
 
-    const singleGameLogic = (playerOne, playerTwo)=>{
-        let currPlayer = playerOne;
+function createGame(gameBoard){
+    
+
+    let playerOne = createPlayer("Arthur", "X", gameBoard);
+    let playerTwo = createPlayer("Bob", "O", gameBoard);
+
+    const players = [
+        playerOne,
+        playerTwo
+    ];
+    let count = 0;
+    let activePlayer = players[0];
+    const getActivePlayer = ()=>activePlayer;
+    const switchTurn = ()=>{
+        activePlayer = activePlayer === players[0]
+            ?  players[1]
+            : players[0];
+    }
+
+    const viewTurn = ()=>{
+        console.log(`It's ${getActivePlayer().getName()}'s turn.`);
+    };
+
+    const playRound = (row,col)=>{
+        let move = activePlayer.makeMove(row, col);
+        if (move === false){
+            return false;
+        }
+        count++;
+
+        const outcome = judgeOutcome();
+        if (outcome !== "keep going"){
+            return outcome;
+        }
+        switchTurn();
         gameBoard.viewGrid();
-        let count = 0;
-    
-        while (true){
-            console.log("===========================");
-            
-            coordinates = prompt("Coordinates: ");
-            let row;
-            let col;
-            [row,col] = coordinates.split(" ");
-            row = Number(row)-1;
-            col = Number(col)-1;
-            console.log(row, col);
-    
-            if (row<0 || row>2  || col<0 || col>2){
-                alert("Please use ranges 1-3 for rows and cols");
-                continue;
-    
-            }
-
-            console.log(playerOne)
-    
-            currPlayer.makeMove(row, col);
-            count++;
-            gameBoard.viewGrid();
-    
-            if (gameBoard.isGameOver()) {
-    
-                console.log(`Game Over! ${currPlayer.getName()} wins!`);
-                alert(`Game Over! ${currPlayer.getName()} wins!`)
-
-                // winner: O, loser: X. loser goes
-                let loser;
-
-                if (currPlayer === playerTwo){
-                    loser = playerOne;
-                } else if (currPlayer === playerOne){
-                    loser = playerTwo;
-                }
-
-                // global.alert("GAME OVER")
-                
-                return [currPlayer, loser];
-            
-            } else if(count===9){
-                console.log("It's a tie!");
-                alert("It's a tie!");
-                
-                return 0;
-    
-            }
-
-            if (currPlayer === playerOne){
-                currPlayer = playerTwo;
-            } else if (currPlayer === playerTwo){
-                currPlayer = playerOne;
-            }
-        }
-    }
-
-    function createPlayer(name, string, gameBoard){
-        let score = 0;
-    
-        function makeMove(row, col){
-            gameBoard.makeMove(row, col, string)
-        }
-    
-        function setString(move){
-            string = move;
-        }
-        function getName(){
-            return name;
-        }
-        function getScore(){
-            return score
-        }
-        function addScore(){
-            score += 1;
-        }
-    
-        return {
-            getName, 
-            getScore,
-            makeMove,
-            setString,
-            addScore
-        }
-    }
-    
-
-    const playerOneName = prompt("PLAYER 1 - name please?");
-    const playerTwoName = prompt("PLAYER 2 - name please?");
-    
-    playerOne = createPlayer(playerOneName, 'X', gameBoard);
-    playerTwo = createPlayer(playerTwoName, 'O', gameBoard);
-
-    if (playerOne === undefined || playerTwo === undefined){
-        // return;
-    }
-
-    // let currPlayerOne = {...playerOne};
-    // let currPlayerTwo = {...playerTwo};
-
-
-    (function wholeGame(){
+        return outcome;
         
-
-        while(true){
-            let result = singleGameLogic(playerOne, playerTwo);
-            if (result === 0){
-
-            } else{
-                let winner;
-                let loser;
-                [winner, loser] = result;
-                winner.addScore();
-            }            
-            
-            console.log(`${playerOne.getName()} ${playerOne.getScore()} - ${playerTwo.getScore()} ${playerTwo.getName()}`)        
+    };
+    const judgeOutcome = ()=>{
+        if (gameBoard.isGameOver()) {
+            // switchTurn();
+            const announcement = `Game Over! ${getActivePlayer().getName()} wins!`
         
-            while(true){
-                let char = prompt(`Wanna play more? (y/n)`);
-                if (char.toLowerCase() === 'y'){
-                    gameBoard.resetGrid();
-                    break;
-                } else if (char.toLowerCase() === 'n'){
-                    return;
-                } else{
-                    alert("Invalid key. Please input y/n");
-                }
+            // console.log(announcement);
+            // alert(`Game Over! ${getActivePlayer().getName()} wins!`);
+    
+            // winner: O, loser: X. loser goes
+            let loser;
+    
+            if (getActivePlayer() === players[0]){
+                loser = players[1];
+            } else if (getActivePlayer() === players[1]){
+                loser = players[0];
             }
+    
+            // global.alert("GAME OVER")
+            
+            return announcement;
+        
+        } else if(count===9){
+            const announcement = "It's a tie!"
 
+            
+            return announcement;
+        } else {
+            return "keep going";
         }
-    })()
-})()
+    
+    };
+    const resetCount = ()=>{
+        count = 0;
+    }
 
+    return {
+        playRound,
+        judgeOutcome,
+        viewTurn,
+        getActivePlayer,
+        resetCount
+    };
+
+}
+
+function play(game, gameBoard){
+    let flag = false;
+
+    for (let i = 0; i<3; i++){
+        if (flag === true){
+            break;
+        }
+        for (let j = 0; j<3; j++){
+            game.viewTurn();
+
+            game.playRound(i,j);
+            announcement = game.judgeOutcome();
+            console.log(announcement);
+            if (announcement != "keep going"){
+                break;
+            }
+        }
+    }
+}
+
+
+
+function createPlayer(name, string, gameBoard){
+    let score = 0;
+
+    function makeMove(row, col){
+        return gameBoard.makeMove(row, col, string);
+        
+    }
+
+    function getString(){
+        return string;
+    }
+
+    function setString(move){
+        string = move;
+    }
+    function getName(){
+        return name;
+    }
+    function getScore(){
+        return score;
+    }
+    function addScore(){
+        score += 1;
+    }
+
+    return {
+        getName, 
+        getScore,
+        makeMove,
+        setString,
+        addScore,
+        getString
+    };
+}
 // create first player - name, score, string
 // attach 'X' to first player
 
@@ -268,6 +273,85 @@ function createGameBoard(){
 
 
 
+function ScreenController(){
+    const container = document.querySelector(".container");
+    const gameBoard = createGameBoard();
+    const game = createGame(gameBoard);
+    const activePlayer = game.getActivePlayer();
+    const displayStatus = document.querySelector(".display");
+    const form = document.querySelector("form");
+    const formButton = form.querySelector("button");
+    formButton.addEventListener("click", ()=>{
+        console.log("HOOORAY");
+    });
+    console.log(displayStatus)
+    displayStatus.classList.remove("display-status");
+    displayStatus.classList.add("neutral");
+    displayStatus.textContent = "";
+
+    
+    
+
+    // play(game, gameBoard);
+
+    function updateScreen(){
+        while(container.hasChildNodes()){
+            container.removeChild(container.firstChild);
+        }
+        let canClick = true;
+        const grid = gameBoard.getGrid();
+        for (const row in grid){
+            for (const col in grid[row]){
+                const button = document.createElement("button");
+                // button.textContent = grid[row][col];
+                container.appendChild(button);
+                button.addEventListener("click", (event)=>{
+                    if (!canClick){
+                        return;
+                    }
+                    const string = game.getActivePlayer().getString();
+                    const outcome = game.playRound(row, col);
+                    if(outcome === false){
+                        return;
+                    }
+                    button.textContent = string;
+                    if(string === "X"){
+                        button.style.backgroundColor = "red";
+                    } else if (string === "O"){
+                        button.style.backgroundColor = "yellow";
+                    }
+
+                    if (outcome !== "keep going"){
+                        canClick = false;
+                        // alert(outcome);
+                        console.log(outcome);
+                        displayStatus.textContent = outcome;
+                        displayStatus.classList.add("display-status");
+                        displayStatus.classList.remove("neutral");
+                    }
+
+                    // updateScreen();
+                })
+            }
+
+        }
+        console.log("GRID:");
+        console.log(gameBoard.getGrid());
+    
+    }
 
 
+    return {
+        updateScreen
+    };
+}
+
+let screen = ScreenController();
+
+screen.updateScreen();
+const newGameButton = document.querySelector(".new-game");
+newGameButton.addEventListener("click", ()=>{
+    let screen = ScreenController();
+    screen.updateScreen();
+})
 
